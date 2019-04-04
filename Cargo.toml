@@ -1,0 +1,11 @@
+[package]
+name = "arxiv"
+version = "0.1.0"
+authors = ["Hiromitsu Oshiba <0x75960@chocola.tech>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "0.9.13"
+serde = {version = "1.0", features = ["derive"]}
+serde-xml-rs = "0.3"
+chrono={version="0.4", features=["serde"]}
