@@ -4,22 +4,19 @@ use serde_xml_rs::from_str;
 
 type GenericResult<T> = Result<T, Box<std::error::Error>>;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct Link {
     title: Option<String>,
     href: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct ArXivAuthor {
     pub name: String,
-
-    // FIXME: got the error "field affiliation not found"
-    // ref. https://github.com/RReverser/serde-xml-rs/blob/master/tests/migrated.rs#L100
-    //pub affiliation: String,
+    pub affiliation: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct ArXivEntry {
     id: String,
     updated: DateTime<Utc>,
@@ -27,17 +24,16 @@ struct ArXivEntry {
     title: String,
     summary: String,
     author: Vec<ArXivAuthor>,
-
-    // FIXME: got the error "field link Duplicated"
+    // track: https://github.com/RReverser/serde-xml-rs/issues/55
     //link: Vec<Link>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Feed {
     entry: Vec<ArXivEntry>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct SearchResultItem {
     pub id: String,
     pub updated: DateTime<Utc>,
@@ -92,6 +88,6 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = search("all:electron&start=0&max_results=10").expect("search failed..");
+        search("all:electron&start=0&max_results=10").expect("search failed..");
     }
 }
