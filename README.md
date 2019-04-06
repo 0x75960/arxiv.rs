@@ -3,6 +3,8 @@
 arxiv api client 
 
 * **(Currently working in progress)** I may make major changes soon.
+* Please note that contained pdf links are made with id.
+    * It's a workaround. I'll improve it later.
 
 ```toml
 [dependencies]
@@ -13,7 +15,7 @@ arxiv = {version = "*", git="https://github.com/0x75960/arxiv.rs"}
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    arxiv::search("all:electron&start=0&max_results=10")?
+    arxiv::search("search_query=all:electron&start=0&max_results=10")?
         .iter()
         .enumerate()
         .for_each(|(idx, x)| {println!("{}: {}", idx+1, x.title)});
