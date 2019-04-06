@@ -15,7 +15,9 @@ arxiv = {version = "*", git="https://github.com/0x75960/arxiv.rs"}
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    arxiv::search("search_query=all:electron&start=0&max_results=10")?
+    arxiv::QueryBuilder::new()
+        .add_search_query("all:electron")
+        .search()?
         .iter()
         .enumerate()
         .for_each(|(idx, x)| {println!("{}: {}", idx+1, x.title)});

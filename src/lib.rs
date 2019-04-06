@@ -89,8 +89,44 @@ impl Feed {
     }
 }
 
-pub fn search(query: impl AsRef<str>) -> GenericResult<Vec<SearchResultItem>> {
-    Ok(Feed::get(query)?.into())
+#[derive(Clone)]
+pub struct QueryBuilder {
+    search_query: Vec<String>,
+    start: usize,
+    max_result: usize,
+}
+
+impl QueryBuilder {
+    pub fn new() -> Self {
+        QueryBuilder {
+            search_query: vec![],
+            start: 0,
+            max_result: 10,
+        }
+    }
+
+    pub fn add_search_query(mut self, query: impl AsRef<str>) -> Self {
+        self.search_query.push(query.as_ref().to_owned());
+        self
+    }
+
+    pub fn set_start(mut self, start: usize) -> Self {
+        self.start = start;
+        self
+    }
+
+    pub fn set_max_result(mut self, max_result: usize) -> Self {
+        self.max_result = max_result;
+        self
+    }
+
+    fn query(&self) -> String {
+        format!("search_query={}&start={}&max_results={}", self.search_query.join("+"), self.start, self.max_result)
+    }
+
+    pub fn search(&self) -> GenericResult<Vec<SearchResultItem>> {
+        Ok(Feed::get(self.query())?.into())
+    }
 }
 
 #[cfg(test)]
@@ -101,8 +137,33 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let results = search("search_query=all:electron&start=0&max_results=10").expect("search failed..");
+    fn query_works() {
+        let q = QueryBuilder::new()
+            .add_search_query("all:electron")
+            .set_start(1)
+            .set_max_result(11)
+            .query();
+
+        assert_eq!("search_query=all:electron&start=1&max_results=11", q);
+
+        let q = QueryBuilder::new()
+            .add_search_query("cat:cs.CR")
+            .add_search_query(r#""machine learning""#)
+            .query();
+
+        assert_eq!(r#"search_query=cat:cs.CR+"machine learning"&start=0&max_results=10"#, q);
+    }
+
+    #[test]
+    fn search_works() {
+        let results = QueryBuilder::new()
+            .add_search_query("cat:cs.CR")
+            .add_search_query(r#""machine learning""#)
+            .set_start(0)
+            .set_max_result(3)
+            .search()
+            .expect("failed to get feed");
+
         for item in results {
             let target_url = item.pdf.unwrap();
             let res = reqwest::get(target_url.as_str()).expect("pdf download failed.");
